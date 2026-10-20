@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/styles.css">
+        <title><%= message %></title>
+        <link rel="icon" type="image/png" href="/icon.png">
+    </head>
+    <body>
+        <%- include('../partials/header') %>
+        <main>
+            <div id="error-unit">
+                <h1><%= responseCode %></h1>
+                <span><%= message %></span>
+                <a href="/">Вернуться на главную</a>
+            </div>
+        </main>
+        <%- include('../partials/footer') %>
+    </body>
+</html>

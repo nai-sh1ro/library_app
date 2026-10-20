@@ -1,7 +1,13 @@
         <header>
             <a class="brand" href="/">Library <br>App</a>
             <nav>
-                    <a href="/">Войти</a>
-                    <a href="/">Регистрация</a>
+                <% if (currentUser) { %>
+                    <a href="/pro"><%= currentUser.username %></a>
+                    <a onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Выйти</a>
+                    <form id="logout-form" action="/logout" method="post" style="display:none;"></form>
+                <% } else { %>
+                    <a href="/login">Войти</a>
+                    <a href="/register">Регистрация</a>
+                <% } %>
             </nav>
         </header>
