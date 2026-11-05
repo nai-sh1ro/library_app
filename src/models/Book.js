@@ -4,9 +4,9 @@ module.exports = (sequelize, DataTypes) => {
         isbn: { type: DataTypes.STRING(13), allowNull: true, unique: true },
         title: { type: DataTypes.STRING(100), allowNull: false },
         author: { type: DataTypes.STRING(100), allowNull: false },
+        publisher: {type: DataTypes.STRING(100), allowNull: false},
         year: { type: DataTypes.INTEGER, allowNull: false },
-        coverURL: { type: DataTypes.STRING(255), allowNull: true },
-        genre: { type: DataTypes.STRING(50), allowNull: false }
+        coverURL: { type: DataTypes.STRING(255), allowNull: true }
     },
     {
         tableName: 'books',
@@ -18,6 +18,12 @@ module.exports = (sequelize, DataTypes) => {
             through: models.Books_Users,
             foreignKey: 'bookId',
             otherKey: 'userId'
+        });
+
+        Book.belongsToMany(models.Genre, {
+            through: models.Books_Genres,
+            foreignKey: 'bookId',
+            otherKey: 'genreId'
         });
     };
     return Book;

@@ -54,7 +54,7 @@ async function login(req, res) {
     return res.status(400).render("auth/login.ejs", { error: "Логин и пароль обязательны к заполнению" });
   }
   if (password.length <= 7) {
-    return res.status(400).render("auth/login.ejs", { error: "Пароль должен быть не короче 8 символов" });
+    return res.status(400).render("auth/login.ejs", { error: "Пароль не может быть менее 8 символов" });
   }
   try {
     const user = await User.findOne({ where: { username } });

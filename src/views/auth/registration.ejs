@@ -9,16 +9,18 @@
     </head>
     <body>
         <%- include('../partials/header') %>
-        <main class="auth">
-            <form class="auth-form" method="post" action="/register">
-                  <% if (error) { %><p class="error"><%= error %></p><% } %>
-                <h1>Регистрация</h1>
-                <label>Имя пользователя </label>
-                <input type="text" name="username" required minlength="3" maxlength="20" pattern="[!-~]+" autocomplete="username" title="Недопустимые символы в логине или пароле">
-                <label>Пароль </label>
-                <input type="password" name="password" required minlength="8" maxlength="20" pattern="[!-~]+" autocomplete="new-password" title="Недопустимые символы в логине или пароле">
-                <button type="submit">Зарегистрироваться</button>
-            </form>
+        <main>
+            <div class="auth">
+                <form class="auth-form" method="post" action="/register">
+                    <h1>Регистрация</h1>
+                    <% if (error) { %><span class="error"><%= error %></span><% } %>
+                    <label>Имя пользователя </label>
+                    <input type="text" name="username" required minlength="3" maxlength="20" pattern="[!-~]+" autocomplete="username" title="Недопустимые символы в логине или пароле">
+                    <label>Пароль </label>
+                    <input type="password" name="password" required minlength="8" maxlength="20" pattern="[!-~]+" autocomplete="new-password" title="Недопустимые символы в логине или пароле">
+                    <button type="submit">Зарегистрироваться</button>
+                </form>
+            </div>    
         </main>
         <%- include('../partials/footer') %>
     </body>

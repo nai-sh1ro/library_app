@@ -10,15 +10,17 @@
     <body>
         <%- include('../partials/header') %>
         <main>
-            <form method="post" action="/login">
-                  <% if (error) { %><div class="error"><%= error %></div><% } %>
-                <h1>Авторизация</h1>
-                <label>Имя пользователя </label>
-                <input type="text" name="username" required minlength="3" maxlength="20" pattern="[!-~]+" autocomplete="username">
-                <label>Пароль </label>
-                <input type="password" name="password" required minlength="8" maxlength="20" pattern="[!-~]+" autocomplete="current-password">
-                <button type="submit">Войти</button>
-            </form>
+            <div class="auth">
+                <form class="auth-form" method="post" action="/login">
+                    <h1>Авторизация</h1>
+                    <% if (error) { %><span class="error"><%= error %></span><% } %>
+                    <label>Имя пользователя </label>
+                    <input type="text" name="username" required minlength="3" maxlength="20" pattern="[!-~]+" autocomplete="username">
+                    <label>Пароль </label>
+                    <input type="password" name="password" required minlength="8" maxlength="20" pattern="[!-~]+" autocomplete="current-password">
+                    <button type="submit">Войти</button>
+                </form>
+            </div>
         </main>
         <%- include('../partials/footer') %>
     </body>

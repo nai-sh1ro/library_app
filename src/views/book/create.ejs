@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/styles.css">
+        <title>Добавить книгу</title>
+        <link rel="icon" type="image/png" href="/icon.png">
+    </head>
+    <body>
+        <%- include('../partials/header') %>
+        <main>
+            <div class="create">
+                <form class="create-form" method="post" action="/books/create" enctype="multipart/form-data">
+                    <h1>Добавить книгу в коллекцию Library App</h1>
+                    <span class="error" id="error"><%= error %></span>
+                    <div class="books-row">
+                        <input type="text" id ="title" name="title" required minlength="1" placeholder="Название книги">
+                        <input type="text" id="author" name="author" required minlength="1" placeholder="Автор книги">
+                    </div>
+                    <div class="books-row">
+                        <input type="text" id="publisher" name="publisher" required minlength="1" placeholder="Название издателя">
+                        <input type="text" id="year" name="year" required minlength="1" maxlength="4" placeholder="Год издания" inputmode="numeric"  pattern="[0-9]*">
+                        <input type="text" id="ISBN" name="ISBN" maxlength="13" placeholder="ISNB (13 символов)" inputmode="numeric" pattern="[0-9]*" value="9785046976199" >
+                    </div>
+                    <div class="books-row">
+                        <details class="genre-dropdown">
+                            <summary>Выберите жанры</summary>
+                            <div class="genre-options">
+                                <% genres.forEach((genre) => { %>
+                                    <label>
+                                        <input type="checkbox" name="genreIds" value="<%= genre.id %>">
+                                        <%= genre.name %>
+                                    </label>
+                                <% }) %>
+                            </div>
+                        </details>
+                    </div>
+                    <div class="books-row">
+                        <button type="button" id="openCoverDialog">Добавить обложку</button>
+                        <dialog id="coverDialog" class="cover-dialog">
+                            <div class="cover-dialog-header">
+                                <h1>Добавить обложку</h1>
+                                <a href="javascript:void(0)" id="closeCoverDialog">&times;</a>
+                            </div>
+                            <div id="dropZone" class="drop-zone">
+                                <span>Перетащите изображение сюда или</span>
+                                <input type="file" id="coverFile" name="cover" accept="image/*" hidden>
+                                <a href="javascript:void(0)" id="browseCover">выберете файл</a>
+                            </div>
+                            <input type="url" id="coverUrl" name="coverUrl" placeholder="https://...">
+                            <div id="palaroid" class="palaroid" hidden>
+                                <div class="polaroid-frame">
+                                    <img id="coverPreview" alt="Предпросмотр обложки">
+                                </div>
+                            </div>
+                        </dialog>
+                    </div>
+                    <button class="create-but" type="submit">Добавить книгу</button>
+                </form>
+                <a href="javascript:void(0)" id="loadDataISBN">Поиск по ISBN в Google Books</a>
+            </div>
+        </main>
+        <script>
+            const dialog = document.getElementById('coverDialog');
+            const fileInput = document.getElementById('coverFile');
+            const dropZone = document.getElementById('dropZone');
+            const urlInput = document.getElementById('coverUrl');
+            const preview = document.getElementById('coverPreview');
+            const polaroid = document.getElementById('palaroid');
+            document.getElementById('openCoverDialog').addEventListener('click', () => {
+                dialog.showModal();
+            });
+            document.getElementById('closeCoverDialog').addEventListener('click', async (e) => {
+                e.preventDefault();
+                dialog.close();
+            });
+            document.getElementById('browseCover').addEventListener('click', async (e) => {
+                e.preventDefault();
+                fileInput.click();
+            });
+            function showFile(file) {
+                if (!file || !file.type.startsWith('image/')) {
+                    return;
+                }
+                urlInput.value = '';
+                preview.src = URL.createObjectURL(file);
+                polaroid.hidden = false;
+            }
+            fileInput.addEventListener('change', () => {
+                showFile(fileInput.files[0]);
+            });
+            urlInput.addEventListener('input', () => {
+                fileInput.value = '';
+                if (urlInput.value) {
+                    preview.src = urlInput.value;
+                    polaroid.hidden = false;
+                } else {
+                    polaroid.hidden = true;
+                }
+            });
+            dropZone.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                dropZone.classList.add('is-dragging');
+            });
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('is-dragging');
+            });
+            dropZone.addEventListener('drop', (event) => {
+                event.preventDefault();
+                dropZone.classList.remove('is-dragging');
+                const file = event.dataTransfer.files[0];
+                if (!file) return;
+                fileInput.files = event.dataTransfer.files;
+                showFile(file);
+            });
+
+            /* Для загрузки данных по ISBN с Google Books */
+            document.getElementById('loadDataISBN').addEventListener('click', async (e) => {
+                e.preventDefault();/* Отключает ссылку */
+                document.getElementById('error').textContent = null;
+                try{
+                    const isbn = document.getElementById('ISBN');
+
+                    if(!isbn.value){ /* Пустой/непустой */
+                        document.getElementById('error').textContent = 'Введите ISBN';
+                        isbn.style.borderColor = 'red';
+                        return;
+                    }
+                    if(isbn.value !== isbn.value.replace(/\D/g, '')){ /* Только цифры */
+                        document.getElementById('error').textContent = 'ISBN должен содержать только цифры';
+                        isbn.style.borderColor = 'red';
+                        isbn.value = null;
+                        return;
+                    }
+                    if(isbn.value.length !== 13){ /* Длина */
+                        document.getElementById('error').textContent = 'ISBN должен содержать 13 символов';
+                        isbn.style.borderColor = 'red';
+                        return;
+                    }  
+                      
+                    const response = await fetch('/books/isbn', { /* Запрос на сервер с ISBN в теле */
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded' 
+                        },
+                        body: new URLSearchParams({ ISBN: isbn.value })
+                    });
+
+                    isbn.style.borderColor = 'black';
+
+                    const data = await response.json(); /* Читает ответ с JSONки */
+
+                    if (!response.ok) { /* Груз 200? */
+                        document.getElementById('error').textContent = 
+                        typeof data.error === 'string'
+                            ? data.error
+                            : data.error?.message || `Ошибка сервера: ${response.status}`;
+                        return;
+                    }
+
+                    /* Кидает данные в форму */
+                    document.getElementById('error').textContent = null;
+                    document.getElementById('title').value = data.items[0].volumeInfo.title || '';
+                    document.getElementById('author').value = data.items[0].volumeInfo.authors ? data.items[0].volumeInfo.authors.join(', ') : '';
+                    document.getElementById('publisher').value = data.items[0].volumeInfo.publisher || '';
+                    document.getElementById('year').value = data.items[0].volumeInfo.publishedDate ? data.items[0].volumeInfo.publishedDate.split('-')[0] : '';
+                    document.getElementById('coverUrl').value = data.items[0].volumeInfo.imageLinks ? data.items[0].volumeInfo.imageLinks.thumbnail : '';
+                    if (document.getElementById('coverUrl').value) {
+                        preview.src = document.getElementById('coverUrl').value;
+                        polaroid.hidden = false;
+                    } else {
+                        polaroid.hidden = true;
+                    }
+                } catch (error){
+                    console.error('Error fetching book data:', error);
+                }
+            });
+        </script>
+        <%- include('../partials/footer') %>
+    </body>
+</html>
