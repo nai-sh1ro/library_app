@@ -1,0 +1,20 @@
+#error-unit {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    align-items: center;
+    animation: form-appear 500ms ease-out both;
+}
+#error-unit h1 {
+    font-size: 6rem;
+    margin: 0;
+}
+#error-unit span {
+    font-size: 1.5rem;
+}
+#error-unit a{
+    position: relative;
+    font-size: 1rem;
+    text-decoration: none;
+}

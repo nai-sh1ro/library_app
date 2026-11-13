@@ -14,6 +14,11 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Book.associate = (models) => {
+        Book.hasMany(models.Books_Users, {
+            as: 'UserBooks',
+            foreignKey: 'bookId'
+        });
+
         Book.belongsToMany(models.User, {
             through: models.Books_Users,
             foreignKey: 'bookId',

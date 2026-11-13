@@ -1,3 +1,48 @@
         <footer>
-            <p>(С) 2026 Library App</p>
+            <div class="infoFoot">
+                <h3>(С) 2026 Library App</h3>
+                <span>Автор: nai.shiro</span>
+                <span>Тел: 375xxxxxxxxx</span>
+                <span>email: naishiro@mail.ru</span>
+            </div>
+            <div class="feedback">
+                <h3>Обратная связь</h3>
+                <textarea id="comment" name="comment" rows="4" style="width: 100%;" placeholder="Ваш текст здесь..."></textarea>
+                <div class="actions">
+                    <input id="contact" placeholder="Способ с вами связаться">
+                    <button id="sendFB">Отправить</button>
+                </div>
+            </div>
         </footer>
+        <script>
+            document.getElementById('sendFB').addEventListener('click',async (event) => {
+                event.preventDefault();
+                const comment = document.getElementById('comment');
+                const contact = document.getElementById('contact');
+                if (!comment.value) {
+                    comment.style.border = '2px solid red';
+                    return;
+                }
+                comment.style.border = '2px solid black';
+                if (!contact.value) {
+                    contact.style.border = '2px solid red';
+                    return;
+                }
+                contact.style.border = '2px solid black';
+                const response = await fetch('/feedback', { 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded' 
+                        },
+                        body: new URLSearchParams({ comment: comment.value, contact: contact.value })
+                });
+                if (response.ok) {
+                    comment.value = '';
+                    contact.value = '';
+                    contact.style.border = '2px solid green';
+                    comment.style.border = '2px solid green';
+                } else {
+                    alert('Произошла ошибка при отправке сообщения.');
+                }
+            });
+        </script>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/main.css">
+        <link rel="stylesheet" href="/booksPage.css">
+        <link rel="stylesheet" href="/animation.css">
+        <link rel="stylesheet" href="/scale.css">
+        <title>Добавить в мою библиотеку</title>
+        <link rel="icon" type="image/png" href="/icon.png">
+        <style>
+            .AB {
+                background-color: #c5c5c585;
+            }
+            .AB::after{
+                 transform: scaleX(1) !important;
+            }
+            .AB:hover::after{
+                 transform: scaleX(0) !important;
+            }
+        </style>
+    </head>
+    <body>
+        <%- include('../partials/header') %>
+        <main>
+            <div class="books">
+                <div class="books-header">
+                    <form class="sort" method="get" action="/books/add">
+                        <input type="search" name="q" value="<%= search %>" placeholder="Поиск книг">
+                        <select name="sort" aria-label="Сортировка книг">
+                            <option value="" <%= !sort ? "selected" : "" %>>Без сортировки</option>
+                            <option value="title-asc" <%= sort === "title-asc" ? "selected" : "" %>>Название: А–Я</option>
+                            <option value="title-desc" <%= sort === "title-desc" ? "selected" : "" %>>Название: Я–А</option>
+                            <option value="author-asc" <%= sort === "author-asc" ? "selected" : "" %>>Автор: А–Я</option>
+                            <option value="author-desc" <%= sort === "author-desc" ? "selected" : "" %>>Автор: Я–А</option>
+                            <option value="year-desc" <%= sort === "year-desc" ? "selected" : "" %>>Сначала новые</option>
+                            <option value="year-asc" <%= sort === "year-asc" ? "selected" : "" %>>Сначала старые</option>
+                        </select>
+                        <button type="submit">Найти</button>
+                    </form>
+                    <a href="/books/create" class="add-but">&plus;</a>
+                </div>
+                <ul id="book-list">
+                <% books.forEach(book => { %>
+                    <li class="book-item">
+                        <% if (book.coverURL) { %>
+                            <img src="/books/<%= book.id %>/cover" alt="Обложка книги" id="coverPreview">
+                        <% } %>
+                        <div class="info">
+                            <h2><%= book.title %></h2>
+                            <span><%= book.author %>, <%= book.year%> <hr> <%= book.Genres.map(genre => genre.name).join(", ") %></span>
+                            <br>
+                            <small class="status-message"></small>
+                        </div>
+                        <% if (book.UserBooks && book.UserBooks.length > 0) { %>
+                            <a href="#" class="check-book" data-book-id="<%= book.id %>">&check;</a>
+                        <% } else { %>
+                            <a href="javascript:void(0)" class="add-book" data-book-id="<%= book.id %>">&plus;</a>
+                        <% } %>
+                    </li>
+                <% }) %>
+                </ul>
+
+                <% if (totalPages > 1) { %>
+                    <nav class="pagination" aria-label="Страницы книг">
+                        <% if (page > 1) { %>
+                            <a href="/books/add?page=<%= page - 1 %>&q=<%= encodeURIComponent(search) %>&sort=<%= encodeURIComponent(sort) %>">Назад</a>
+                        <% } %>
+                        <span aria-current="page">Страница <%= page %> из <%= totalPages %></span>
+                        <% if (page < totalPages) { %>
+                            <a href="/books/add?page=<%= page + 1 %>&q=<%= encodeURIComponent(search) %>&sort=<%= encodeURIComponent(sort) %>">Вперёд</a>
+                        <% } %>
+                    </nav>
+                <% } %>
+
+                <p id="no-results" <%= books.length ? "hidden" : "" %>>Если вы ничего не нашли, <a href="/books/create">добавьте книгу в нашу коллекцию</a></p>
+            </div>
+        </main>
+        <script>
+            document.querySelectorAll(".add-book").forEach(link => {
+                link.addEventListener("click", async () => {
+                    const bookId = link.dataset.bookId;
+
+                    try {
+                        const response = await fetch(`/books/${encodeURIComponent(bookId)}/add`, {
+                            method: "POST"
+                        });
+
+                        if (!response.ok) {
+                            alert("Не удалось добавить книгу");
+                            return;
+                        }
+                        const checkLink = document.createElement("a");
+                        checkLink.href = "#";
+                        checkLink.className = "check-book";
+                        checkLink.dataset.bookId = link.dataset.bookId;
+                        checkLink.textContent = "✓";
+                        checkLink.dataset.bookId = link.dataset.bookId;
+                        
+                        link.replaceWith(checkLink);
+                    } catch (error) {
+                        console.error(error);
+                        alert("Не удалось связаться с сервером");
+                    }
+                });
+            });
+        </script>
+        <%- include('../partials/footer') %>
+    </body>
+</html>

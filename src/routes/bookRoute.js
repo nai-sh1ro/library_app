@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const bookController = require("../controllers/bookController");
 
-const uploadDir = path.join(__dirname, "../../public/uploads");
+const uploadDir = path.join(__dirname, "../data/covers");
 fs.mkdirSync(uploadDir, { recursive: true });
 
 const extensionsByMimeType = {
@@ -37,8 +37,14 @@ const upload = multer({
 });
 
 route.get("/", bookController.renderIndex);
+route.get("/books", bookController.renderBooks);
 route.get("/books/create", bookController.renderCreate);
 route.post("/books/isbn", bookController.getBookByISBN);
 route.post("/books/create", upload.single("cover"), bookController.createBook);
+route.patch("/books/:id/status", bookController.updateBookStatus);
+route.get("/books/:id/cover", bookController.getIMG);
+route.delete("/books/:id/delete", bookController.deleteBook);
+route.get("/books/add", bookController.renderAdd);
+route.post("/books/:id/add", bookController.addBook);
 
 module.exports = route;

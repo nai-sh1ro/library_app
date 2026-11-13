@@ -3,7 +3,10 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="/styles.css">
+        <link rel="stylesheet" href="/main.css">
+        <link rel="stylesheet" href="/authPage.css">
+        <link rel="stylesheet" href="/animation.css">
+        <link rel="stylesheet" href="/scale.css">
         <title>Авторизация</title>
         <link rel="icon" type="image/png" href="/icon.png">
     </head>
@@ -11,9 +14,11 @@
         <%- include('../partials/header') %>
         <main>
             <div class="auth">
-                <form class="auth-form" method="post" action="/login">
+                <form class="auth-form" id="login-form" method="post" action="/login">
                     <h1>Авторизация</h1>
-                    <% if (error) { %><span class="error"><%= error %></span><% } %>
+                    <span id="login-error" class="error" role="alert" aria-live="polite" hidden>
+                        <%= error || "" %>
+                    </span>
                     <label>Имя пользователя </label>
                     <input type="text" name="username" required minlength="3" maxlength="20" pattern="[!-~]+" autocomplete="username">
                     <label>Пароль </label>
@@ -22,6 +27,44 @@
                 </form>
             </div>
         </main>
+        <script>
+            const loginForm = document.getElementById("login-form");
+            const loginError = document.getElementById("login-error");
+
+            loginForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                loginError.hidden = true;
+                loginError.textContent = "";
+
+                try {
+                    const response = await fetch(loginForm.action, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: new URLSearchParams(new FormData(loginForm))
+                    });
+                    
+                    if (response.redirected) {
+                        window.location.assign(response.url);
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        const data = await response.json();
+                        loginError.textContent = data.error || "Не удалось войти";
+                        loginError.hidden = false;
+                        return;
+                    }
+
+                    window.location.assign(data.redirect);
+                } catch (error) {
+                    console.error(error);
+                    loginError.textContent = "Не удалось связаться с сервером";
+                    loginError.hidden = false;
+                }
+            });
+        </script>
         <%- include('../partials/footer') %>
     </body>
 </html>

@@ -13,7 +13,7 @@ const PORT = process.env.PORT;
 const app = express();
 sessionsConfig(app);
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '100mb'}));
 app.use(express.static("public"));
 app.use(express.json());
 

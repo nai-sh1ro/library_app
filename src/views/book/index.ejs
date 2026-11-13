@@ -3,14 +3,52 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="/styles.css">
+        <link rel="stylesheet" href="/main.css">    
+        <link rel="stylesheet" href="/indexPage.css">
+        <link rel="stylesheet" href="/animation.css">
+        <link rel="stylesheet" href="/scale.css">
         <title>Страница</title>
         <link rel="icon" type="image/png" href="/icon.png">
     </head>
     <body>
         <%- include('../partials/header') %>
         <main>
-            <h1>Добро пожаловать в Library App</h1>
+            <div class="index">
+                <div class="famous">
+                    <h2 class="index-title">Популярное</h2>
+                    <ul id="book-list">
+                    <% books.forEach(book => { %>
+                        <li class="book-item">
+                            <% if (book.coverURL) { %>
+                                <img src="/books/<%= book.id %>/cover" alt="Обложка книги" id="coverPreview">
+                            <% } %>
+                            <div class="info">
+                                <h2><%= book.title %></h2>
+                                <span><%= book.author %>, <%= book.year%> %></span>
+                            </div>
+                        </li>
+                    <% }) %>
+                    </ul>
+                </div>
+                <div class="news">
+                    <div class="news-unit">
+                        <h2 class="index-title">Новости</h2>
+                        <span>Пока здесь ничего нет</span>
+                    </div>
+                    <div class="row">
+                        <a href="https://t.me/library_appp">
+                        <img src="tg.png" class="SM">
+                        <span>Наш телеграм канал <br> Новости сайта и не только</span>
+                        </a>
+                    </div>
+                    <div class="row">
+                        <a href="https://www.instagram.com/nai.sh1ro?exln=ZDl4ZTNuM2ZzY3Vh&utm_source=qr">
+                        <img src="inst.png" class="SM">
+                        <span>Наш инстаграм </span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </main>
         <%- include('../partials/footer') %>
     </body>

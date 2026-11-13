@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/main.css">
+        <link rel="stylesheet" href="/booksPage.css">
+        <link rel="stylesheet" href="/animation.css">
+         <link rel="stylesheet" href="/scale.css">
+        <title>Моя коллекция</title>
+        <link rel="icon" type="image/png" href="/icon.png">
+        <style>
+            .MC {
+                background-color: #c5c5c585;
+            }
+            .MC::after{
+                 transform: scaleX(1) !important;
+            }
+            .MC:hover::after{
+                 transform: scaleX(0) !important;
+            }
+        </style>
+    </head>
+    <body>
+        <%- include('../partials/header') %>
+        <main>
+            <div class="books">
+                <div class="books-header">
+                    <form class="sort" method="get" action="/books">
+                        <input type="search" name="q" value="<%= search %>" placeholder="Поиск книг">
+                        <select name="sort" aria-label="Сортировка книг">
+                            <option value="" <%= !sort ? "selected" : "" %>>Без сортировки</option>
+                            <option value="title-asc" <%= sort === "title-asc" ? "selected" : "" %>>Название: А–Я</option>
+                            <option value="title-desc" <%= sort === "title-desc" ? "selected" : "" %>>Название: Я–А</option>
+                            <option value="author-asc" <%= sort === "author-asc" ? "selected" : "" %>>Автор: А–Я</option>
+                            <option value="author-desc" <%= sort === "author-desc" ? "selected" : "" %>>Автор: Я–А</option>
+                            <option value="year-desc" <%= sort === "year-desc" ? "selected" : "" %>>Сначала новые</option>
+                            <option value="year-asc" <%= sort === "year-asc" ? "selected" : "" %>>Сначала старые</option>
+                        </select>
+                        <select name="status" aria-label="Фильтр по статусу">
+                            <option value="" <%= !status ? "selected" : "" %>>Все статусы</option>
+                            <option value="Не прочитана" <%= status === "Не прочитана" ? "selected" : "" %>>Не прочитана</option>
+                            <option value="Читаю" <%= status === "Читаю" ? "selected" : "" %>>Читаю</option>
+                            <option value="Прочитана" <%= status === "Прочитана" ? "selected" : "" %>>Прочитана</option>
+                        </select>
+                        <button type="submit">Найти</button>
+                    </form>
+                    <a href="/books/add" class="add-but">&plus;</a>
+                </div>
+                <ul id="book-list">
+                <% books.forEach(book => { %>
+                    <li class="book-item">
+                        <% if (book.coverURL) { %>
+                            <img src="/books/<%= book.id %>/cover" alt="Обложка книги" id="coverPreview">
+                        <% } %>
+                        <div class="info">
+                            <h2><%= book.title %></h2>
+                            <span><%= book.author %>, <%= book.year%> <hr> <%= book.Genres.map(genre => genre.name).join(", ") %></span>
+                            <br>
+                            <select class="statusSelect" data-book-id="<%= book.id %>" data-current-status="<%= book.UserBooks[0]?.status %>">
+                                <option value="Не прочитана" <%= book.UserBooks[0]?.status === "Не прочитана" ? "selected" : "" %>>Не прочитана</option>
+                                <option value="Читаю" <%= book.UserBooks[0]?.status === "Читаю" ? "selected" : "" %>>Читаю</option>
+                                <option value="Прочитана" <%= book.UserBooks[0]?.status === "Прочитана" ? "selected" : "" %>>Прочитана</option>
+                            </select>
+                            <small class="status-message"></small>
+                        </div>
+                        <img src="/trash.ico" class="trash-ico" data-book-id="<%= book.id %>">
+                    </li>
+                <% }) %>
+                </ul>
+
+                <% if (totalPages > 1) { %>
+                    <nav class="pagination" aria-label="Страницы книг">
+                        <% if (page > 1) { %>
+                            <a href="/books?page=<%= page - 1 %>&q=<%= encodeURIComponent(search) %>&sort=<%= encodeURIComponent(sort) %>&status=<%= encodeURIComponent(status) %>">Назад</a>
+                        <% } %>
+                        <span aria-current="page">Страница <%= page %> из <%= totalPages %></span>
+                        <% if (page < totalPages) { %>
+                            <a href="/books?page=<%= page + 1 %>&q=<%= encodeURIComponent(search) %>&sort=<%= encodeURIComponent(sort) %>&status=<%= encodeURIComponent(status) %>">Вперёд</a>
+                        <% } %>
+                    </nav>
+                <% } %>
+
+                <p id="no-results" <%= books.length ? "hidden" : "" %>>Ничего не найдено.</p>
+            </div>
+        </main>
+        <script>
+            document.querySelectorAll(".trash-ico").forEach(icon => {
+                icon.addEventListener("click", async () => {
+                    const bookId = icon.dataset.bookId;
+
+                    try {
+                        const response = await fetch(`/books/${encodeURIComponent(bookId)}/delete`, {
+                            method: "DELETE"
+                        });
+
+                        if (!response.ok) {
+                            alert("Не удалось удалить книгу");
+                            return;
+                        }
+                        window.location.reload();
+                    } catch (error) {
+                        console.error(error);
+                        alert("Не удалось связаться с сервером");
+                    }
+                });
+            });
+
+            document.querySelectorAll(".statusSelect").forEach(statusSelect => {
+                statusSelect.addEventListener("change", async () => {
+                    const previousStatus = statusSelect.dataset.currentStatus;
+                    const message = statusSelect.nextElementSibling;
+                    statusSelect.disabled = true;
+                    message.textContent = "Сохраняю...";
+
+                    try {
+                        const response = await fetch(`/books/${encodeURIComponent(statusSelect.dataset.bookId)}/status`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ status: statusSelect.value })
+                        });
+                        const result = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(result.error || "Не удалось обновить статус");
+                        }
+
+                        statusSelect.dataset.currentStatus = result.status;
+                        message.textContent = "Сохранено";
+                        const selectedStatus = new URLSearchParams(window.location.search).get("status");
+                        if (selectedStatus && selectedStatus !== result.status) {
+                            window.location.reload();
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        statusSelect.value = previousStatus;
+                        message.textContent = error.message || "Не удалось обновить статус";
+                    } finally {
+                        statusSelect.disabled = false;
+                    }
+                });
+            });
+        </script>
+        <%- include('../partials/footer') %>
+    </body>
+</html>

@@ -3,7 +3,10 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="/styles.css">
+        <link rel="stylesheet" href="/main.css">
+        <link rel="stylesheet" href="/authPage.css">
+        <link rel="stylesheet" href="/animation.css">
+        <link rel="stylesheet" href="/scale.css">
         <title>Регистрация</title>
         <link rel="icon" type="image/png" href="/icon.png">
     </head>
@@ -11,9 +14,11 @@
         <%- include('../partials/header') %>
         <main>
             <div class="auth">
-                <form class="auth-form" method="post" action="/register">
+                <form class="auth-form" id="registration-form" method="post" action="/register">
                     <h1>Регистрация</h1>
-                    <% if (error) { %><span class="error"><%= error %></span><% } %>
+                    <span id="registration-error" class="error" role="alert" aria-live="polite" hidden>
+                        <%= error || "" %>
+                    </span>
                     <label>Имя пользователя </label>
                     <input type="text" name="username" required minlength="3" maxlength="20" pattern="[!-~]+" autocomplete="username" title="Недопустимые символы в логине или пароле">
                     <label>Пароль </label>
@@ -22,6 +27,45 @@
                 </form>
             </div>    
         </main>
+        <script>
+            const registrationForm = document.getElementById("registration-form");
+            const registrationError = document.getElementById("registration-error");
+
+            registrationForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                registrationError.hidden = true;
+                registrationError.textContent = "";
+
+                try {
+                    const response = await fetch(registrationForm.action, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: new URLSearchParams(new FormData(registrationForm))
+                    });
+
+                    if (response.redirected) {
+                        window.location.assign(response.url);
+                        return;
+                    }
+                    
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        registrationError.textContent = data.error || "Не удалось зарегистрироваться";
+                        registrationError.hidden = false;
+                        return;
+                    }
+
+                    window.location.assign(data.redirect);
+                } catch (error) {
+                    console.error(error);
+                    registrationError.textContent = "Не удалось связаться с сервером";
+                    registrationError.hidden = false;
+                }
+            });
+        </script>
         <%- include('../partials/footer') %>
     </body>
 </html>

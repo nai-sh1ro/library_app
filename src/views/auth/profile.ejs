@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/main.css">
+        <link rel="stylesheet" href="/profilePage.css">
+        <link rel="stylesheet" href="/animation.css">
+        <link rel="stylesheet" href="/scale.css">
+        <title><%= currentUser.username %></title>
+        <link rel="icon" type="image/png" href="/icon.png">
+    </head>
+    <body>
+        
+        <%- include('../partials/header') %>
+        <main>
+            <div class="profile">
+                <div class="profile-card">
+                    <div class="profile-info">
+                        <div class="profile-image">
+                            <img src="/profile.jpg" alt="Profile Picture">
+                            <span><%= currentUser.id.toString(2).padStart(8, '0') %></span>
+                        </div>
+                        <div class="profile-text">
+                            <h1>Library <br>App </h1>
+                            <input type="text" value="<%= currentUser.username %>" id="usernameInput">
+                            <small id="statusMessage"></small>
+                            <div class="profile-actions">
+                                <a href="javascript:void(0)" id="updateUser">Изменить</a>
+                                <a href="javascript:void(0)" id="deleteUser">Удалить</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <script>
+            document.getElementById("deleteUser").addEventListener("click", async (e)=>{
+                e.preventDefault();
+                try{
+                    const response = await fetch ("/profile/delete", {
+                        method: "DELETE"
+                    });
+                    if (response.redirected) {
+                        window.location.assign(response.url);
+                        return;
+                    }
+                    if (!response.ok) {
+                        alert(await response.text());
+                        return;
+                    }
+                } 
+                catch (error) {
+                    console.error(error);
+                    alert("Не удалось связаться с сервером");
+                }
+            });
+
+            const input = document.getElementById("usernameInput");
+            const message = document.getElementById("statusMessage");
+            document.getElementById("updateUser").addEventListener("click", async (e)=>{
+                e.preventDefault();
+                if(!input.value){
+                    message.textContent = "Введите имя";
+                    return;
+                }
+                if(input.value == "<%= currentUser.username %>"){
+                    message.textContent = "Придумай новое имя";
+                    return;
+                }
+                try{
+                    message.textContent = " ";
+                    const response = await fetch('/profile/update', { /* Запрос на сервер с ISBN в теле */
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded' 
+                        },
+                        body: new URLSearchParams({ NewUsername: input.value })
+                    });
+                    if (response.redirected) {
+                        window.location.assign(response.url);
+                        return;
+                    }
+                    if (!response.ok){
+                        const data = await response.json();
+                        message.textContent =  data.error || "Не удалось изменить";
+                        return;
+                    }
+
+                }
+                catch (error) {
+                    console.error(error);
+                    message.textContent ="Не удалось связаться с сервером";
+                }
+
+            });
+        </script>
+        <%- include('../partials/footer') %>
+    </body>
+</html>

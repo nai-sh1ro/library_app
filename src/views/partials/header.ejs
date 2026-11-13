@@ -1,13 +1,45 @@
         <header>
-            <a class="brand" href="/">Library <br>App</a>
-            <div class="header-links">
-                <% if (currentUser) { %>
-                    <a href="/books/create"><%= currentUser.username %></a>
-                    <a onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Выйти</a>
-                    <form id="logout-form" action="/logout" method="post" style="display:none;"></form>
-                <% } else { %>
-                    <a href="/login">Войти</a>
-                    <a href="/register">Регистрация</a>
-                <% } %>
+            <div class="brand-row">
+                <a class="brand" href="/">Library <br>App</a>
+                <div class="header-links">
+                    <% if (currentUser) { %>
+                        <a href="/profile"><%= currentUser.username %></a>
+                        <a onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Выйти</a>
+                        <form id="logout-form" action="/logout" method="post" style="display:none;"></form>
+                    <% } else { %>
+                        <a href="/login">Войти</a>
+                        <a href="/register">Регистрация</a>
+                    <% } %>
                 </div>
+            </div>
+            <% if (currentUser) { %>
+            <div class="header-nav">
+                <nav class="desktop">
+                    <a href="/books" class="MC">Моя библиотека</a>
+                    <a href="/books/add" class="AB">Наша коллекция</a>
+                    <a href="/books/create" class="CB">Добавить книгу</a>
+                    <a href="/profile" class="PR">Читательский билет</a>
+                </nav>
+                <a class="mobile-menu-toggle" href="#mobile-menu" role="button" aria-controls="mobile-menu" aria-expanded="false"> Меню ☰ </a>
+                <nav class="mobile-menu" id="mobile-menu" aria-label="Мобильная навигация">
+                    <a href="/books" class="MC">Моя библиотека</a>
+                    <a href="/books/add" class="AB">Наша коллекция</a>
+                    <a href="/books/create" class="CB">Добавить книгу</a>
+                    <a href="/profile" class="PR">Читательский билет</a>
+                </nav>
+            </div>
+            <% } %>
         </header>
+        <script>
+            const menuToggle = document.querySelector('.mobile-menu-toggle');
+            const mobileMenu = document.querySelector('.mobile-menu');
+
+            menuToggle.addEventListener('click', (event) => {
+            event.preventDefault();
+
+            const isOpen = menuToggle.getAttribute('aria-expanded') === 'true';
+            menuToggle.setAttribute('aria-expanded', String(!isOpen));
+            mobileMenu.classList.toggle('is-open', !isOpen);
+        });
+        </script>
+        

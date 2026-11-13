@@ -1,0 +1,93 @@
+.index{
+    align-self: center;
+    width: min(1700px, calc(100% - 32px));
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+}
+.famous{
+    flex: 1 1 calc(50% - 1rem);
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+}
+.index-title{
+    font-size: 1.5rem;
+    margin-bottom: 0;
+    padding-left: 2.5rem;
+}
+.news{
+    padding: 0.5rem;
+    flex: 1 1 calc(50% - 1rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.news-unit{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-bottom: 2px solid black;
+}
+.news-unit span{
+    padding: 1rem 0;
+}
+.news span {
+    text-align: center;
+}
+.news a{
+    text-decoration: none;
+}
+.row{
+    margin: 1rem 2.5rem;
+    border-bottom: 2px solid black;
+}
+.row a {
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 1rem;
+}
+.row span{
+    text-align: left;
+}
+
+.SM{
+    max-width: 50px;
+    max-height: 50px;
+}
+#book-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin: 0;
+}
+#book-list li{
+    padding: 1rem;
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    border-bottom: 2px solid black;
+}
+#book-list li[hidden] {
+    display: none;
+}
+.info{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.info h2{
+    font-size: 1.5rem;
+}
+.info span{
+    font-size: 1rem;
+}
+#coverPreview {
+    display: block;
+    max-width: 128px;
+    max-height: 192px;
+    object-fit: contain;
+    box-shadow: 4px 4px 4px 2px rgb(0 0 0 / 25%);
+}
